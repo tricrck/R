@@ -1,0 +1,142 @@
+---
+title: "Question 1"
+author: "Neel Patel"
+date: "2022-12-17"
+output: word_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Correlation Analysis:
+
+Perform data screening making sure to check for accuracy, missing, outliers.
+Perform assumption checks for linearity, normality, homogeneity, and homoscedasticity.
+Capture a Correlation Matrix and Visual to express the relationship between each of the variables in the iris dataset.  
+What is the correlated effect? Provide an interpretation in your own words. Support your response with results captured from the correlation analysis.  
+Calculate the Variance. What does it tell us?
+Calculate the Covariance. What does it tell us?
+
+Data screening
+
+```{r iris}
+##data
+iris = read.csv("iris_exams.csv")
+
+
+# Accuracy
+summary(iris)
+str(iris)
+unique(iris$Species)
+
+iris$Species = as.factor(iris$Species)
+str(iris$Species)
+summary(iris)
+```
+```{r}
+# Missing
+percentmiss <- function(x){ sum(is.na(x))/length(x) * 100 }
+missing <- apply(iris, 1, percentmiss)
+table(missing)
+
+
+
+
+```
+We have no missing data
+
+```{r}
+# Outliers
+
+#  summary of your mahal scores.
+mahal = mahalanobis(iris[ , 3:6], colMeans(iris[ , 3:6], na.rm = TRUE),
+                    cov(iris[ , 3:6], use = "pairwise.complete.obs"))
+
+summary(mahal)
+
+# the df for your Mahalanobis cutoff?
+cutoff = qchisq(1-.001, ncol(iris[, 3:6]))
+cutoff
+
+## df and cutoff
+ncol(iris[,3:6])
+#  outliers
+summary(mahal < cutoff)
+
+#  	Delete the outliers.
+noout = subset(iris, mahal < cutoff)
+str(noout)
+```
+```{r linearity}
+# Assumptions 
+head(noout[,2:6])
+rand = rchisq(nrow(noout[,2:6]), 7)
+mod = lm(rand ~ ., data = noout[,2:6])
+
+standard = rstudent(mod)
+fit = scale(mod$fitted.values)
+
+##linearity
+{qqnorm(standard)
+abline(0,1)}
+
+
+```
+The assumption for linearity is not met.
+
+
+```{r normality}
+
+hist(standard, breaks = 15)
+
+
+```
+The assumption for normality is not met the plot has a slight positive skew.
+
+```{r homogs}
+
+{plot(fit, standard)
+abline(0,0)
+abline(v = 0)}
+
+```
+
+The assumption for homogeneity is met
+The assumption for homoscedasticity is met
+
+Correlation Matrix and Visual
+```{r}
+
+cor(noout[ , 3:6], method = "pearson", use ="pairwise.complete.obs")
+
+cor(noout[ , 3:6], method = "spearman", use ="pairwise.complete.obs")
+
+cor(noout[ , 3:6], method = "kendall", use ="pairwise.complete.obs")
+
+library(DataExplorer)
+title = "Iris Correlation Plot"
+plot_correlation(noout[ , 3:6])
+```
+
+The iris dataset numeric variable that have a strong positive correlation are petal length and petal width while petal lenght and sepal width had an average negative correlation. The iris dataset is a classic data set used for classification and regression problems. The data set consists of 300 records, each described by 6 attributes
+
+The correlated effect occurs when the model's independent variables are correlated, resulting in linear model overfitting. For example, based on the results above, we cannot employ numerous independent variables in our data since they are very collinear, thus we must resort to non-linear regression models.
+
+```{r Variance}
+
+
+var(noout$Sepal.Length)
+var(noout$Sepal.Width)
+var(noout$Petal.Length)
+var(noout$Petal.Width)
+
+```
+The variance is a measure of how spread out a set of data is. The low variances indicates that the data points are generally close to the mean
+
+```{r covariance}
+
+cov(noout[ , 3:6])
+
+```
+Covariance is a measure of the relationship between two variables. It represents how much the two variables change together. A positive covariance indicates that the two variables tend to change in the same direction, while a negative covariance indicates that the two variables tend to change in opposite directions. The low covariance indicates that there is a weak relationship between the two variables.

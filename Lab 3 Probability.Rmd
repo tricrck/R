@@ -1,0 +1,58 @@
+---
+title: "Lab 3 Probability"
+author: "Neel Patel"
+date: "2022-09-21"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## On Your Own
+# Comparing Kobe Bryant to the Independent Shooter
+
+```{r kobe}
+download.file("http://www.openintro.org/stat/data/kobe.RData", destfile = "kobe.RData")
+
+load("kobe.RData")
+
+head(kobe, 10)
+```
+##   Using  calc_streak , compute the streak lengths of  sim_basket .
+
+# 1. Describe the distribution of streak lengths. What is the typical streak length for this simulated independent shooter with a 45% shooting percentage? How long is the player’s longest streak of baskets in 133 shots? Make sure to include a plot in your answer.
+
+```{r}
+outcomes <- c("H", "M")
+sim_basket <- sample(outcomes, size = 133, replace = TRUE, prob = c(.45, 0.55))
+
+streak_length <- calc_streak(sim_basket)
+streak_length
+
+barplot(table(streak_length), col = "Blue", main = "Distribution of Streak Lenghts")
+```
+
+The probability is 0 to 5, the typical streak length is 0 based on the mode. The longest streak length is 5.
+
+# 2. If you were to run the simulation of the independent shooter a second time, how would you expect its streak distribution to compare to the distribution from the question above? Exactly the same? Somewhat similar? Totally different? Explain your reasoning.(SEEDING THE SIMULATION????).
+
+The first shot, like all other shots, can be considered independent of each other. Therefore the distribution should be similar to the first run since the shots are independent of each other. The probability of making the shot doesn’t change between the two simulations
+
+
+
+# 3. How does Kobe Bryant's distribution of streak lengths compare to the distribution of streak lengths for the simulated shooter? Using this comparison, do you have evidence that the hot hand model fits Kobe's shooting patterns? Explain
+
+
+```{r}
+kobe_streak <- calc_streak(kobe$basket)
+barplot(table(kobe_streak))
+```
+
+```{r}
+barplot(table(streak_length))
+```
+
+The distribution of streak lengths differs between the simulated shooter and Kobe. There is inadequate evidence that the constructed model matches Kobe's shooting habits just because the distributions are comparable: both modes are 0 (mostly 0 streaks) and both distributions are right skewed with similar ranges.
+
+

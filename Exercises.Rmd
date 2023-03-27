@@ -1,0 +1,73 @@
+---
+title: "Exercise 2.22 - 2.24"
+author: "Student Name"
+date: "2023-02-10"
+output: word_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## 2.22
+Figure 2.16 above gives the Minitab output of a
+histogram of these waiting times that has been con- structed using automatic classes.
+# a. Describe where the waiting times seem to be concentrated.
+
+Based on the histogram, the waiting times seem to be concentrated in the middle classes (5, 6, 7, 8), with the peak frequency at class 5. This means that the majority of the waiting times are around the average waiting time, which can be determined from the center of the distribution. The histogram suggests that the waiting times are symmetrically distributed around the center, with a relatively equal number of waiting times above and below the average waiting time.
+
+# b Describe and interpret the shape of the distribution of waiting times.
+
+The shape of the distribution of waiting times is roughly bell-shaped, which means that it has a peak in the middle and tapers off toward the extremes. This shape is commonly characterized by having a well-defined average, or mean, and a well-defined spread, or standard deviation. The bell-shaped distribution of waiting times suggests that the waiting times are normally distributed, with a well-defined average and spread, and that the majority of the waiting times are clustered around the center.
+
+# c What is the class length that has been automatically defined by Minitab?
+
+```{r}
+
+classes = 13
+
+class_length <- (13 - 0) / classes
+
+class_length
+```
+# d Write out the automatically defined classes and con- struct a cumulative percent frequency distribution of the waiting times using these classes.
+
+```{r}
+
+freq <- c(1, 4, 7, 8, 17, 16, 14, 12, 8, 6, 4, 2, 1)
+classes <- 1:13
+
+class_frequency <- data.frame(classes, freq)
+
+class_frequency
+
+cumulative_frequency <- cumsum(freq)
+cumulative_percent_frequency <- cumulative_frequency / sum(freq) * 100
+
+class_frequency$cumulative_frequency <- cumulative_frequency
+class_frequency$cumulative_percent_frequency <- paste0(round(cumulative_percent_frequency, 2), " %")
+
+class_frequency
+```
+
+```{r}
+waiting_times <- c(1, 4, 7, 8, 17, 16, 14, 12, 8, 6, 4, 2, 1)
+classes <- 1:13
+class_frequency <- data.frame(classes, waiting_times)
+
+waiting_times_data <- c()
+for (i in 1:13) {
+  waiting_times_data <- c(waiting_times_data, rep(classes[i], waiting_times[i]))
+}
+
+waiting_times_data <- waiting_times_data[1:100]
+
+# Create a histogram
+library('ggplot2')
+hist <- ggplot(data=data.frame(waiting_times_data), aes(x=waiting_times_data)) +
+  geom_histogram(binwidth=0.5, fill="lightblue", color="black")
+hist
+# Add a frequency polygon to the histogram
+hist + geom_density(fill="red", alpha=0.5)
+
+```

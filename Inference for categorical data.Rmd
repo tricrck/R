@@ -1,0 +1,112 @@
+---
+title: "Inference for categorical data"
+author: "Neel Patel"
+date: "2022-11-09"
+output: word_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## On your own
+
+The question of atheism was asked by WIN-Gallup International in a similar survey that was conducted in 2005. (We assume here that sample sizes have remained the same.) Table 4 on page 13 of the report summarizes survey results from 2005 and 2012 for 39 countries.
+
+
+```{r atheism}
+
+download.file("http://www.openintro.org/stat/data/atheism.RData", destfile = "atheism.RData")
+load("atheism.RData")
+
+head(atheism)
+
+```
+
+## 1.Answer the following two questions using the inference function. As always, write out the hypotheses for any tests you conduct and outline the status of the conditions for inference.
+
+#a. Is there convincing evidence that Spain has seen a change in its atheism index between 2005 and 2012?
+Hint: Create a new data set for respondents from Spain. Form confidence intervals for the true proportion of athiests in both years, and determine whether they overlap.
+
+
+H0: There is No convincing evidence that Spain has seen a change in its atheism index between the years 2005 and 2012.
+
+H0: atheism = non-atheism
+
+HA: There is convincing evidence that Spain has seen a change in its atheism index between the years 2005 and 2012.
+
+HA: atheism ≠ non-atheism
+
+```{r spain}
+
+
+spain <-  subset(atheism, nationality == "Spain")
+
+by(spain$response, spain$year, length)
+table(spain$year)
+
+# confidence intervals
+
+inference(y = spain$response, x = spain$year, est = "proportion",type = "ht", null = 0, alternative = "twosided", method = "theoretical", success = "atheist")
+
+```
+The p-value is more than 0.05, therefore we accept the null hypothesis that there's No convincing evidence that Spain has seen a change in its atheism index between the years 2005 and 2012.
+
+
+
+
+
+#b. Is there convincing evidence that the United States has seen a change in its atheism index between 2005 and 2012?
+
+H0: There is No convincing evidence that the United States has seen a change in its atheism index between 2005 and 2012.
+
+H0: atheism = non-atheism
+
+HA: There is convincing evidence that the United States has seen a change in its atheism index between 2005 and 2012.
+
+HA: atheism ≠ non-atheism
+
+```{r}
+
+us <-  subset(atheism, nationality == "United States")
+
+by(us$response, us$year, length)
+table(us$year)
+
+# confidence intervals
+
+inference(y = us$response, x = us$year, est = "proportion",type = "ht", null = 0, alternative = "twosided", method = "theoretical", success = "atheist")
+
+
+```
+The p-value is less than 0.05, we reject the null hypothesis that there's No convincing evidence that the United States has seen a change in its atheism index between 2005 and 2012.
+
+
+
+
+## 2.If in fact there has been no change in the atheism index in the countries listed in Table 4, in how many of those countries would you expect to detect a change (at a significance level of 0.05) simply by chance?
+Hint: Look in the textbook index under Type 1 error.
+
+
+When the null hypothesis is disregarded when it is actually the case, this is known as a type 1 error. Generally speaking, we would want not to reject Null hypothesis more frequently than 5% of the time. This corresponds to  the 0.05 threshold of significance. We must multiply 0.05 by 39 to get a rough idea of how many nations we may expect to detect a change in the atheism score by chance since Table 4 includes research findings from 2005 to 2012. Consequently, they are two nations or 1.95.
+
+
+## 3.Suppose you're hired by the local government to estimate the proportion of residents that attend a religious service on a weekly basis. According to the guidelines, the estimate must have a margin of error no greater than 1% with 95% confidence. You have no idea what to expect for \(p\). How many people would you have to sample to ensure that you are within the guidelines?
+Hint: Refer to your plot of the relationship between \(p\) and margin of error. Do not use the data set to answer this question.
+
+P and n are two unknowable variables in this equation. At 95% confidence, the result is 0.0051 if the margin of error is 0.01. When p is unknown, we use the rule of thumb that the margin of error is greatest when p is 0.5. Therefore, if no alternative estimate is provided, we usually take this worst-case estimate. The estimate's error margin cannot be more than 1%. We use the equation SE = sqrt frac(1-p)n. According to the computation, we would require 9604 people at the very least to have a 95% confidence level that the sample percentage is within 0.01 of the real proportion.
+
+####################################################
+## SMALL SAMPLE SIMULATION
+####################################################
+
+
+```{r}
+hand =  as.factor(c(rep("correct",7),rep("wrong",5),rep("correct",11),rep("wrong",1) ))
+gr = c(rep("palm",12),rep("back",12))
+
+inference(hand,gr, est = "proportion", type = "ht", null =0, alternative= "twosided", 
+          order=c("back","palm"), success = "correct", method = "simulation", nsim=100,seed =879)
+
+```
+

@@ -1,0 +1,139 @@
+---
+title: "Project 2"
+author: "S Nida Zaidi"
+date: "2023-03-22"
+output: word_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+##  Project 2: Decision making based on historical data
+ 
+ 
+ 
+# 1. Explain the variance and skewness
+
+Variance is a statistical measure that describes how much the data points in a dataset vary from the mean. It is calculated by taking the average of the squared differences of each data point from the mean. A high variance indicates that the data points are spread out over a wide range, while a low variance indicates that the data points are clustered around the mean.
+
+Skewness, on the other hand, is a measure of the asymmetry of a probability distribution. It describes the degree to which the data is skewed to the left or the right of the mean. A positively skewed distribution has a long tail on the right side and a concentration of data on the left, while a negatively skewed distribution has a long tail on the left and a concentration of data on the right. A symmetric distribution has no skewness.
+
+
+      a. Show a simple example of how to calculate variance and then explain the meaning of it.
+    
+```{r 1a}
+# A vector of numbers
+x <- c(2, 5, 7, 8, 10, 12, 13, 14, 15, 18)
+
+# calculate the mean of x
+mean <- mean(x)
+
+# Compute the squared deviations from the mean
+deviations <- (x - mean)^2
+
+# Sum the squared deviations
+sum_dev <- sum(deviations)
+
+# Divide by the sample size minus one to get the variance
+var <- sum_dev / (length(x) - 1)
+
+# print the mean and variance
+cat("The mean of x is:", mean, "\n")
+cat("The variance of x is:", var, "\n")
+
+```
+This tells us that the mean of x is 10.4, and the variance of x is 24.26667. The variance of x tells us how spread out the data points are from the mean, and in this case, the variance is relatively high, indicating that the data points in x are somewhat spread out from the mean. The mean is a useful measure of central tendency that tells us the typical value in the dataset, while the variance tells us how much the data points vary from that typical value. Variance provides a measure of the variability of the data and can be used to inform predictions and risk assessments.
+
+
+      b. Show a simple example of how to calculate skewness and then explain the meaning of it.
+
+```{r 1b}
+# install and load the moments package
+#install.packages("moments")
+library(moments)
+
+# A vector of numbers
+x <- c(2, 5, 7, 8, 10, 12, 13, 14, 15, 18)
+
+# calculate the skewness of x
+skew <- skewness(x)
+
+# print the skewness
+cat("The skewness of x is:", skew, "\n")
+
+
+```
+In the example, the skewness of x is -0.1946985, which is close to 0. This indicates that x is approximately symmetric or nearly normally distributed, meaning that the values are distributed relatively evenly around the mean. However, it is important to note that a dataset can still be considered normal or nearly normal even if its skewness is not exactly zero.
+
+
+# 2. After loading dataG2.csv into R or Octave, explain the meaning of each column or what the attributes explain. Columns are for skewness, median, mean, standard deviation, and the last price (each row describes with the numbers the distribution of the stock prices):
+
+```{r Question2}
+# Select the Dataset Directory
+setwd(choose.dir())
+
+# Read data
+data <- read.csv("dataG2.csv")
+
+# Display the first few rows of the dataset
+head(data)
+
+# Rename columns
+colnames(data) <- c("Skewness", "Median", "Mean", "Standard_Deviation", "Last_Price")
+
+# Print the updated column names
+head(data)
+
+```
+
+Skewness (X.0.01954083): This column represents the skewness of the stock price distribution. Skewness is a measure of the asymmetry of the probability distribution of a real-valued random variable. Positive skewness indicates that the tail on the right side of the distribution is longer or fatter, while negative skewness indicates that the tail on the left side is longer or fatter.
+
+Median (X0.51413006): This column represents the median of the stock prices. The median is the middle value in a dataset when the values are sorted in ascending or descending order. In the context of stock prices, the median can be useful for understanding the central tendency of the dataset without being affected by extreme values.
+
+Mean (X0.50578123): This column represents the mean (average) of the stock prices. The mean is calculated by adding all the stock prices and dividing the sum by the number of observations. It is a measure of central tendency and can be influenced by extreme values in the dataset.
+
+Standard Deviation (X0.25652292): This column represents the standard deviation of the stock prices. Standard deviation is a measure of the amount of variation or dispersion in a set of values. A low standard deviation indicates that the values tend to be close to the mean, while a high standard deviation indicates that the values are spread out over a wider range.
+
+Last Price (X0.045819789): This column represents the last recorded stock price for each observation. It can be useful for understanding the most recent value of the stock and tracking its performance over time.
+
+
+
+# 3. Draw your own conclusions based on what you learned under 1. and 2.
+
+    a. Explain the meaning of variables 'I_1' and 'I_2' after you execute (after dataG2.csv is loaded in R or Octave) 
+      imported_data <- read.csv("dataG2.csv") 
+      
+      S=imported_data[,5]-imported_data[,3]  
+      
+      I_1 =which.min(S) # use figure I_1 (see attached)
+      
+      I_2 = which.max(S) # use figure I_2 (see attached)
+```{r}
+imported_data <- data 
+
+S=imported_data[,5]-imported_data[,3]
+
+I_1 =which.min(S) # use figure I_1 (see attached)
+cat( "I_1 is" , I_1 , "\n")
+I_2 = which.max(S) # use figure I_2 (see attached)
+cat( "I_2 is" , I_2)
+```
+      
+      
+The variable S is a vector containing the differences between the last price (column 5) and the mean price (column 3) for each stock. I_1 is the index of the minimum value in the S vector, which corresponds to the row where the difference between the last price and the mean price is the smallest (most negative). This row represents the stock that has the lowest last price relative to its historical average price.
+
+I_2 is the index of the maximum value in the S vector, which corresponds to the row where the difference between the last price and the mean price is the largest (most positive). This row represents the stock that has the highest last price relative to its historical average price
+
+
+    b. Based on the results in a., which row (stock) would you buy and sell and why (if you believe history repeats)? 
+ If you believe history repeats, i would buy the stock at row I_1 and sell the stock at row I_2. This is because the stock at row I_1 has a last price that is lower than its historical average, which may indicate that it is currently undervalued and has the potential to increase in value. Conversely, the stock at row I_2 has a last price that is higher than its historical average, which may indicate that it is currently overvalued and could decrease in value.
+ 
+    c. Explain how would you use the skewness (first column attribute) to decide about buying or selling a stock. 
+Skewness, as the first column attribute, can be used to assess the asymmetry of the stock price distribution. If skewness is positive, it indicates that the right tail of the distribution is longer or fatter, meaning that there are more higher-priced stocks than expected in a normal distribution. If skewness is negative, it indicates that the left tail of the distribution is longer or fatter, meaning that there are more lower-priced stocks than expected in a normal distribution.
+
+# 4. If you want to decide, based on the historical data, which row (stock) to buy or sell, would you base your decision on skewness attribute (1st column) or the differences between the last prices with mean (differences between 5th attribute and 3rd attribute)? Explain.
+
+I would consider the differences between the last prices and the mean prices (differences between the 5th and 3rd attributes) rather than the skewness attribute (1st column). Because the differences between the last prices and the mean prices provide a direct comparison of the current stock price relative to its historical average price. This can help you identify undervalued or overvalued stocks. If the last price is significantly lower than the mean price, it may indicate that the stock is currently undervalued and has the potential to increase in value. Conversely, if the last price is significantly higher than the mean price, it may indicate that the stock is currently overvalued and could decrease in value.
+
+Skewness is also a measure of the asymmetry of the stock price distribution. While it can provide some insights into the overall shape of the distribution, it does not directly indicate whether a stock is currently undervalued or overvalued. Using skewness alone to make buy or sell decisions can be misleading, as a stock with a positive skewness might still be overvalued, and a stock with a negative skewness might still be undervalued.

@@ -1,0 +1,77 @@
+---
+title: "Question 3"
+author: "Neel Patel"
+date: "2022-12-17"
+output: word_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+##(1) ANOVA:
+
+Capture an ANOVA model on the iris dataset. Set the dependent variable to 'Species'.
+Capture a summary. 
+Provide an interpretation of the results in your own words.  Support your response with results captured from running ANOVA.
+
+```{r iris}
+## Load the necessary libraries
+library(ez)
+library(MOTE)
+library(ggplot2)
+library(pwr)
+
+##data
+iris = read.csv("iris_exams.csv")
+
+
+# Accuracy
+str(iris)
+unique(iris$Species)
+iris$Species = as.factor(iris$Species)
+str(iris$Species)
+```
+
+Outliers
+```{r}
+# Outliers
+
+#  summary of your mahal scores.
+mahal = mahalanobis(iris[ , 3:6], colMeans(iris[ , 3:6], na.rm = TRUE),
+                    cov(iris[ , 3:6], use = "pairwise.complete.obs"))
+
+summary(mahal)
+
+# the df for your Mahalanobis cutoff?
+cutoff = qchisq(1-.001, ncol(iris[, 3:6]))
+cutoff
+
+## df and cutoff
+ncol(iris[,3:6])
+#  outliers
+summary(mahal < cutoff)
+
+#  	Delete the outliers.
+noout = subset(iris, mahal < cutoff)
+str(noout)
+```
+
+```{r}
+noout$partno = 1:nrow(noout)
+options(scipen = 999)
+noout$Species = as.numeric(noout$Species)
+noout$partno = as.factor(noout$partno)
+noout$Sepal.Length = as.numeric(noout$Sepal.Length)
+
+ezANOVA(data = noout,
+        dv = Species,
+        between = Sepal.Length,
+        wid = partno,
+        type = 3, 
+        detailed = T)
+
+```
+Levene’s test is significant, F(1,296)=123.9346, p=0.0000000000000000000000028040797422941528. The results suggest that there is no significant difference between the Species and Sepal Length in the iris dataset. We can also use the one-way ANOVA to test if there is a significant difference between Sepal Length and Species in iris dataset. The results show that there is no significant difference between the Species and Sepal Length in the iris dataset
+
+

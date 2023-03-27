@@ -1,0 +1,179 @@
+s_chunk$set(echo = TRUE)
+```
+
+# Dataset:
+
+600 employees participated in a company-wide experiment to test if an educational program would be effective at increasing employee satisfaction. Half of the employees were assigned to be in the control group, while the other half were assigned to be in the experimental group. The experimental group was the only group that received the educational intervention. All groups were given an employee satisfaction scale at time one to measure their initial levels of satisfaction. The same scale was then used half way through the program and at the end of the program. The goal of the experiment was to assess satisfaction to see if it increased across the measurements during the program as compared to a control group. 
+
+## Variables: 
+
+    a) Gender (1 = male, 2 = female)
+    b) Group (1 = control group, 2 = experimental group)
+    c) 3 satisfaction scores, ranging from 2-100 points. Decimals are possible! The control group was measured at the same three time points, but did not take part in the educational program. 
+        i) Before the program
+        ii)	Half way through the program 
+        iii) After the program 
+
+```{r starting}
+employees <- read.csv("https://raw.githubusercontent.com/tricrck/data/main/06_data.csv")
+head(employees)
+```
+
+# Data screening:
+
+## Accuracy:
+
+    a)	Include output and indicate how the data are not accurate.
+    b)	Include output to show how you fixed the accuracy errors, and describe what you did.
+    
+```{r accuracy}
+
+str(employees)
+
+employees$Gender = factor(employees$Gender, 
+                     levels = c(1,2), 
+                     labels = c("Male", "Female"))
+employees$Group = factor(employees$Group, 
+                     levels = c(1,2),
+                     labels = c("control group", "experimental group"))
+table(employees$Gender)
+
+table(employees$Group)
+
+```
+```{r}
+summary(employees)
+```
+
+## Missing data:
+
+    a)	Include output that shows you have missing data.
+    b)	Include output and a description that shows what you did with the missing data.
+        i)	Replace all participant data if they have less than or equal to 20% of missing data by row. 
+        ii)	You can leave out the other participants (i.e. you do not have to create allrows). 
+        
+```{r missing}
+
+# a)
+
+apply(employees,2,function(x) sum(is.na(x)))
+
+```
+
+```{r}
+# b)
+
+missing = function(x){sum(is.na(x))/length(x)*100}
+
+apply(employees,1,missing)
+
+percentmiss = function(x){sum(is.na(x))/length(x)*100}
+apply(data,1,percentmiss)
+
+missing = apply(data,1,percentmiss)
+table(missing)
+
+replace = subset(data, missing <= 20)
+missing1 = apply(replace,1,percentmiss)
+table(missing1)
+
+
+replace_col = replace[,-c(1,2)]
+dont_col = replace[,c(1,2)]
+library(mice)
+
+temp_no_miss = mice(replace_col)
+
+no_miss = complete(temp_no_miss,1)
+summary(no_miss)
+
+```
+
+
+## Outliers:
+
+    a)	Include a summary of your mahal scores that are greater than the cutoff.
+    b)	What are the df for your Mahalanobis cutoff?
+    c)	What is the cut off score for your Mahalanobis measure?
+    d)	How many outliers did you have?
+    e)	Delete all outliers. 
+    
+```{r outliers}
+
+maha = mahalanobis(no_miss, colMeans(no_miss, na.rm=TRUE), cov(no_miss, use ="pairwise.complete.obs"))
+maha
+
+cutoff = qchisq(1-.001,ncol(no_miss))
+print(cutoff)
+
+summary(maha < cutoff)
+
+noout_data = subset(no_miss, maha < cutoff)
+str(noout_data)
+
+
+```
+
+# Assumptions:
+
+## Additivity: 
+
+    a)  Include the symnum bivariate correlation table of your continuous measures.
+    b)  Do you meet the assumption for additivity?
+    
+```{r additivity}
+
+library(corrplot)
+
+cor(noout_data)
+
+corrplot(cor(noout_data))
+
+symnum(cor(noout_data))
+```
+
+## Linearity: 
+
+    a)  Include a picture that shows how you might assess multivariate linearity.
+    b)  Do you think you've met the assumption for linearity?
+    
+```{r linearity}
+
+random = rchisq(nrow(noout_data), 7)
+data2 = lm(random~., data = noout_data)
+summary(data2)
+
+standardized = rstudent(data2)
+qqnorm(standardized)
+abline(0,1)
+```
+
+## Normality: 
+
+    a)  Include a picture that shows how you might assess multivariate normality.
+    b)  Do you think you've met the assumption for normality? 
+
+```{r normality}
+
+library(moments)
+skewness(noout_data, na.rm = T)
+kurtosis(noout_data, na.rm = T)
+
+hist(standardized, breaks = 15)
+
+```
+
+## Homogeneity/Homoscedasticity: 
+
+    a)  Include a picture that shows how you might assess multivariate homogeneity.
+    b)  Do you think you've met the assumption for homogeneity?
+    c)  Do you think you've met the assumption for homoscedasticity?
+
+```{r homog-s}
+
+plot(scale(data2$fitted.values), standardized) 
+abline(0,0)
+abline(v = 0)
+
+
+```

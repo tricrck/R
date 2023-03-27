@@ -1,0 +1,71 @@
+---
+title: "Question 2"
+author: "Neel Patel"
+date: "2022-12-17"
+output: word_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## (1) Linear Regression Analysis:
+
+Capture a  Regression Model with Only Significant Variables.  Set the dependent variable to 'Species'. Even though the variable is categorical and regression is not the proper model to use we will ignore this fact for the purpose of the assignment.
+Capture the final model summary. Provide any visuals that help interpret the results. 
+Provide an interpretation of the results in your own words.  Support your response with results captured from the linear regression analysis.
+
+```{r iris}
+##data
+iris = read.csv("iris_exams.csv")
+
+
+# Accuracy
+str(iris)
+unique(iris$Species)
+iris$Species = as.factor(iris$Species)
+str(iris$Species)
+```
+
+
+```{r}
+# Outliers
+
+#  summary of your mahal scores.
+mahal = mahalanobis(iris[ , 3:6], colMeans(iris[ , 3:6], na.rm = TRUE),
+                    cov(iris[ , 3:6], use = "pairwise.complete.obs"))
+
+summary(mahal)
+
+# the df for your Mahalanobis cutoff?
+cutoff = qchisq(1-.001, ncol(iris[, 3:6]))
+cutoff
+
+## df and cutoff
+ncol(iris[,3:6])
+#  outliers
+summary(mahal < cutoff)
+
+#  	Delete the outliers.
+noout = subset(iris, mahal < cutoff)
+str(noout)
+
+noout$Species = as.numeric(noout$Species)
+
+#  Regression Model with Only Significant Variables
+RegModel = lm(Species ~ Sepal.Length + Sepal.Width + Petal.Length + Petal.Width, data = noout)
+summary(RegModel, correlation = TRUE)
+```
+
+The Linear Regression model has an R-squared value of  0.9405 which means it predicts the Species variable 94% of the time correctly. The model has 2.2e-16 as the p value would indicate a significant result with a p value of 2.2e-16. This indicates that there is a very high probability that the model will predict Species values correctly again, and we can be confident in its results.
+```{r linearity}
+
+standardized = rstudent(RegModel)
+fitted = scale(RegModel$fitted.values)
+
+##linearity
+
+{qqnorm(standardized)
+abline(0,1)}
+```
+Linearity is an important assumption in linear regression models because it allows for the interpretation of the model coefficients as the expected change in the response variable for a one unit change in the predictor variable, holding all other predictor variables constant. It also allows for the use of simple and efficient optimization algorithms for estimating the model parameters. From the Plot the assumption for linearity in our model is met.

@@ -1,0 +1,86 @@
+---
+title: "Question 4"
+author: "Neel Patel"
+date: "2022-12-17"
+output: word_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Provide at least the following in the report for full credit: 
+
+- Null Hypothesis H0 : Sepal.Length has no effect on Species (Setosa & Versicolor Only). That is to say that the difference between the observed Sepal.Length values for various Species are not statistically different
+
+- Alternate Hypothese Ha : Sepal.Length has some effect on Species (Setosa & Versicolor Only). That is to say that the difference between the observed Sepal.Length values for various Species are in fact different from each other.
+
+(1) The t-test :
+
+Capture a t-test to compare the  Sepal.Length of the Species (Setosa & Versicolor Only) from the iris dataset. 
+Capture a summary. 
+Provide an interpretation of the results in your own words.  Support your response with results captured from performing a t-test.
+
+```{r}
+##data
+iris = read.csv("iris_exams.csv")
+
+
+# Accuracy
+str(iris)
+unique(iris$Species)
+
+
+# Subset Species for Setosa & Versicolor Only
+
+iris1 = iris[iris$Species %in% c('setosa','versicolor'),]
+unique(iris1$Species)
+```
+
+```{r}
+# Outliers
+
+#  summary of your mahal scores.
+mahal = mahalanobis(iris1[ , 3:6], colMeans(iris1[ , 3:6], na.rm = TRUE),
+                    cov(iris1[ , 3:6], use = "pairwise.complete.obs"))
+
+summary(mahal)
+
+# the df for your Mahalanobis cutoff?
+cutoff = qchisq(1-.001, ncol(iris1[, 3:6]))
+cutoff
+
+## df and cutoff
+ncol(iris1[,3:6])
+#  outliers
+summary(mahal < cutoff)
+
+#  	Delete the outliers.
+noout = subset(iris1, mahal < cutoff)
+str(noout)
+
+```
+iris$Species = as.factor(iris$Species)
+
+```{r}
+##Independent t-test: equal variances
+t.test(Sepal.Length ~ Species,
+ data = noout,
+ var.equal = TRUE,
+ paired = FALSE)
+
+##independent t test unequal variances
+t.test(Sepal.Length ~ Species,
+ data = noout,
+ var.equal = FALSE,
+ paired = FALSE)
+
+M = with(noout, tapply(Sepal.Length, Species, mean))
+stdev = with(noout, tapply(Sepal.Length, Species, sd))
+N = with(noout, tapply(Sepal.Length, Species, length))
+M;stdev;N
+
+```
+Differences between groups was found: t(198)=-14.045,p=0.00000000000000022 in the Independent t-test set to equal variances. The results suggest that there is a small significant difference in the mean scores between the groups.The mean and standard deviation of setosa are both smaller than those of versicolor . According to statistics, the mean difference of = 5.986069 ,(df = 200) with a p-value < 0.05, so we reject our null hypothesis that there were no significant differences in Species and Sepal length results before the intervention.
+
+
